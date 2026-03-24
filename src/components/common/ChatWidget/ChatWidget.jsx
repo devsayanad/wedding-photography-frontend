@@ -5,6 +5,7 @@ import styles from './ChatWidget.module.css';
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true); // New state for fade logic
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -25,81 +26,64 @@ const ChatWidget = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
+  // Unified send logic
+  const processMessage = async (text) => {
+    if (!text.trim() || isLoading) return;
 
     const userMessage = {
-      id: messages.length + 1,
-      text: inputValue,
+      id: Date.now(),
+      text: text,
       sender: 'user',
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setShowSuggestions(false); // Hide suggestions on any interaction
     setInputValue('');
     setIsLoading(true);
 
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const responses = {
-        greeting: [
-          "I'm so excited for your wedding! What specific aspect of photography would you like to know about? 📸",
-          "Wedding planning is such a beautiful journey! How can I assist you today?",
-          "Hello! Ready to create some magical memories? What would you like to know?"
-        ],
-        packages: "We offer three beautiful packages: Essential (perfect for intimate weddings), Premium (our most popular with 2 photographers), and Luxury (full weekend coverage). Which type of celebration are you planning?",
-        pricing: "Our packages start at RS.12000. The average investment is RS.24000-RS.50000. Would you like me to help you find the perfect package for your budget?",
-        booking: "We recommend booking 9-12 months in advance, especially for peak season (May-October). Would you like to check availability for your date?",
-        destination: "Absolutely! We adore destination weddings and are passport-ready. We've captured love stories in over 15 countries! Where are you dreaming of getting married?",
-        engagement: "Engagement sessions are a wonderful way to get comfortable in front of the camera! They're included in our Premium and Luxury packages.",
-        default: "That's a fantastic question! For detailed information about our services or to see more photos, I recommend checking our portfolio or scheduling a consultation. Would you like me to help you with that?"
+        packages: "We offer three beautiful packages: Essential, Premium, and Luxury. Which type of celebration are you planning?",
+        pricing: "Our packages start at RS.12000. The average investment is RS.24000-RS.50000.",
+        booking: "We recommend booking 9-12 months in advance. Would you like to check availability?",
+        destination: "Absolutely! We've captured love stories in over 15 countries!",
+        engagement: "Engagement sessions are included in our Premium and Luxury packages.",
+        default: "That's a fantastic question! For detailed info, I recommend scheduling a consultation."
       };
 
-      const msg = inputValue.toLowerCase();
-      let reply;
+      const msg = text.toLowerCase();
+      let reply = responses.default;
+      if (msg.includes('package')) reply = responses.packages;
+      else if (msg.includes('price') || msg.includes('cost')) reply = responses.pricing;
+      else if (msg.includes('book') || msg.includes('date')) reply = responses.booking;
+      else if (msg.includes('destination')) reply = responses.destination;
+      else if (msg.includes('engagement')) reply = responses.engagement;
 
-      if (msg.includes('hi') || msg.includes('hello') || msg.includes('hey')) {
-        reply = responses.greeting[Math.floor(Math.random() * responses.greeting.length)];
-      } else if (msg.includes('package') || msg.includes('option')) {
-        reply = responses.packages;
-      } else if (msg.includes('price') || msg.includes('cost') || msg.includes('how much')) {
-        reply = responses.pricing;
-      } else if (msg.includes('book') || msg.includes('available') || msg.includes('date')) {
-        reply = responses.booking;
-      } else if (msg.includes('destination') || msg.includes('travel')) {
-        reply = responses.destination;
-      } else if (msg.includes('engagement') || msg.includes('pre-wedding')) {
-        reply = responses.engagement;
-      } else {
-        reply = responses.default;
-      }
-
-      const botMessage = {
-        id: messages.length + 2,
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
         text: reply,
         sender: 'bot',
         timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
+      }]);
     } catch (error) {
-      console.error('Chat error:', error);
-      
-      const errorMessage = {
-        id: messages.length + 2,
-        text: "I'm having trouble connecting right now. Please email us at info@eternalmoments.com or call (+977) 123-4567 for immediate assistance.",
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        text: "I'm having trouble connecting right now. Please email info@eternalmoments.com.",
         sender: 'bot',
         timestamp: new Date(),
         isError: true
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    processMessage(inputValue);
   };
 
   const suggestedQuestions = [
@@ -112,11 +96,9 @@ const ChatWidget = () => {
 
   return (
     <div className={styles.chatWidget}>
-      {/* Chat Toggle Button */}
       <motion.button
         className={styles.toggleButton}
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? 'Close chat' : 'Open chat'}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
@@ -128,7 +110,6 @@ const ChatWidget = () => {
         )}
       </motion.button>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -136,133 +117,64 @@ const ChatWidget = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
           >
-            {/* Chat Header */}
             <div className={styles.chatHeader}>
               <div className={styles.headerContent}>
-                <div className={styles.botAvatar}>
-                  <Bot size={20} />
-                </div>
+                <div className={styles.botAvatar}><Bot size={20} /></div>
                 <div>
                   <h3 className={styles.headerTitle}>Wedding Assistant</h3>
-                  <p className={styles.headerSubtitle}>Ask me anything! 💍</p>
+                  <p className={styles.headerSubtitle}>Online | Ask me anything!</p>
                 </div>
               </div>
-              <motion.button
-                className={styles.closeButton}
-                onClick={() => setIsOpen(false)}
-                aria-label="Close chat"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <X size={20} />
-              </motion.button>
+              <button className={styles.closeButton} onClick={() => setIsOpen(false)}><X size={20} /></button>
             </div>
 
-            {/* Chat Messages */}
             <div className={styles.messagesContainer}>
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
-                  className={`${styles.message} ${
-                    message.sender === 'user' ? styles.userMessage : styles.botMessage
-                  } ${message.isError ? styles.errorMessage : ''}`}
+                  className={`${styles.message} ${message.sender === 'user' ? styles.userMessage : styles.botMessage}`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
                 >
-                  <div className={styles.messageAvatar}>
-                    {message.sender === 'user' ? (
-                      <User size={16} />
-                    ) : (
-                      <Bot size={16} />
-                    )}
-                  </div>
                   <div className={styles.messageContent}>
                     <p className={styles.messageText}>{message.text}</p>
-                    <span className={styles.messageTime}>
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </span>
+                    <span className={styles.messageTime}>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </motion.div>
               ))}
-              
-              {isLoading && (
-                <div className={styles.loadingMessage}>
-                  <div className={styles.typingIndicator}>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                  <span className={styles.typingText}>Thinking...</span>
-                </div>
-              )}
-              
+              {isLoading && <div className={styles.loadingMessage}>Thinking...</div>}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggested Questions */}
-            <div className={styles.suggestedQuestions}>
+            {/* Fading Suggested Questions Container */}
+            <div className={`${styles.suggestedQuestions} ${!showSuggestions ? styles.fadeOut : ''}`}>
               <p className={styles.suggestedTitle}>Quick questions:</p>
               <div className={styles.questionsGrid}>
-                {suggestedQuestions.map((question, index) => (
-                  <motion.button
-                    key={index}
-                    className={styles.questionChip}
-                    onClick={() => {
-                      setInputValue(question);
-                      setTimeout(() => {
-                        document.querySelector(`.${styles.sendButton}`)?.click();
-                      }, 100);
-                    }}
-                    disabled={isLoading}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {question}
-                  </motion.button>
+                {suggestedQuestions.map((q, i) => (
+                  <button key={i} className={styles.questionChip} onClick={() => processMessage(q)} disabled={isLoading}>
+                    {q}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Chat Input */}
             <form className={styles.inputContainer} onSubmit={handleSendMessage}>
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about packages, pricing, or wedding tips..."
+                placeholder="Ask about packages or pricing..."
                 className={styles.chatInput}
-                disabled={isLoading}
-                aria-label="Type your message"
               />
-              <motion.button
-                type="submit"
-                className={styles.sendButton}
-                disabled={!inputValue.trim() || isLoading}
-                aria-label="Send message"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
+              <button type="submit" className={styles.sendButton} disabled={!inputValue.trim() || isLoading}>
                 <Send size={20} />
-              </motion.button>
+              </button>
             </form>
 
-            {/* Chat Footer */}
             <div className={styles.chatFooter}>
               <p className={styles.footerText}>
-                AI-powered assistant • <span className={styles.highlight}>Real responses</span> •{' '}
-                <button
-                  className={styles.resetButton}
-                  onClick={() => setMessages([messages[0]])}
-                  aria-label="Reset conversation"
-                >
-                  Start over
-                </button>
+                AI Assistant • <button className={styles.resetButton} onClick={() => { setMessages([messages[0]]); setShowSuggestions(true); }}>Start over</button>
               </p>
             </div>
           </motion.div>
