@@ -1,0 +1,266 @@
+.packages {
+  padding: 4rem 0;
+  background: #f8f9fa;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  max-width: 800px;
+  margin: 1rem auto 0;
+  line-height: 1.6;
+}
+
+.packageGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .packageGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.packageCard {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.packageCard.popular {
+  border-color: #d4af37;
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(212, 175, 55, 0.15);
+}
+
+@media (max-width: 767px) {
+  .packageCard.popular {
+    transform: scale(1);
+  }
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.packageHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.packageName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2530;
+  margin-bottom: 0.5rem;
+}
+
+.packagePrice {
+  margin: 1rem 0;
+}
+
+.price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #d4af37;
+  display: block;
+  line-height: 1;
+}
+
+.priceNote {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.packageDescription {
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 1rem 0 0 0;
+}
+
+.features {
+  flex: 1;
+  margin-bottom: 1.5rem;
+}
+
+.featuresTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a2530;
+  margin-bottom: 1rem;
+}
+
+.featuresList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featureItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.featureIcon {
+  color: #d4af37;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.bestFor {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #d4af37;
+}
+
+.bestFor strong {
+  color: #1a2530;
+}
+
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.inquireButton,
+.detailsButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid;
+}
+
+.inquireButton {
+  background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+  color: white;
+  border-color: #d4af37;
+}
+
+.inquireButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.detailsButton {
+  background: transparent;
+  color: #d4af37;
+  border-color: #e9ecef;
+}
+
+.detailsButton:hover {
+  background: #f8f9fa;
+  border-color: #d4af37;
+}
+
+.customPackage {
+  background: white;
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 2px dashed #d4af37;
+}
+
+.customContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.customTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a2530;
+  margin-bottom: 1rem;
+}
+
+.customDescription {
+  color: #6c757d;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.customFeatures {
+  list-style: none;
+  margin: 0 0 2rem 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.customFeatures li {
+  background: #f8f9fa;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: #495057;
+  font-size: 0.95rem;
+  border: 1px solid #e9ecef;
+}
+
+.customCta {
+  background: transparent;
+  color: #d4af37;
+  border: 2px solid #d4af37;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.customCta:hover {
+  background: #d4af37;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
