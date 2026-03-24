@@ -39,7 +39,7 @@
   bottom: 80px;
   right: 0;
   width: 600px;
-  max-width: calc(100vw - 2.5rem);
+  max-width: calc(100vw - 2rem);
   height: 600px;
   max-height: 70vh;
   background: white;
