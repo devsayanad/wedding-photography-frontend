@@ -5,7 +5,7 @@ import styles from './ChatWidget.module.css';
 
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(true); // New state for fade logic
+  const [showSuggestions, setShowSuggestions] = useState(true); // Added state
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -26,39 +26,42 @@ const ChatWidget = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Unified send logic
-  const processMessage = async (text) => {
-    if (!text.trim() || isLoading) return;
+  const handleSendMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
 
     const userMessage = {
       id: Date.now(),
-      text: text,
+      text: inputValue,
       sender: 'user',
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setShowSuggestions(false); // Hide suggestions on any interaction
     setInputValue('');
     setIsLoading(true);
+    setShowSuggestions(false); // Hide suggestions when any message is sent
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const responses = {
-        packages: "We offer three beautiful packages: Essential, Premium, and Luxury. Which type of celebration are you planning?",
-        pricing: "Our packages start at RS.12000. The average investment is RS.24000-RS.50000.",
-        booking: "We recommend booking 9-12 months in advance. Would you like to check availability?",
-        destination: "Absolutely! We've captured love stories in over 15 countries!",
+        greeting: ["I'm so excited for your wedding! What specific aspect of photography would you like to know about? 📸"],
+        packages: "We offer three beautiful packages: Essential, Premium, and Luxury.",
+        pricing: "Our packages start at RS.12000. Average investment is RS.24000-RS.50000.",
+        booking: "We recommend booking 9-12 months in advance. Check availability?",
+        destination: "Absolutely! We adore destination weddings and are passport-ready.",
         engagement: "Engagement sessions are included in our Premium and Luxury packages.",
-        default: "That's a fantastic question! For detailed info, I recommend scheduling a consultation."
+        default: "That's a fantastic question! Would you like to schedule a consultation?"
       };
 
-      const msg = text.toLowerCase();
+      const msg = inputValue.toLowerCase();
       let reply = responses.default;
-      if (msg.includes('package')) reply = responses.packages;
+
+      if (msg.includes('hi') || msg.includes('hello')) reply = responses.greeting[0];
+      else if (msg.includes('package')) reply = responses.packages;
       else if (msg.includes('price') || msg.includes('cost')) reply = responses.pricing;
-      else if (msg.includes('book') || msg.includes('date')) reply = responses.booking;
+      else if (msg.includes('book')) reply = responses.booking;
       else if (msg.includes('destination')) reply = responses.destination;
       else if (msg.includes('engagement')) reply = responses.engagement;
 
@@ -71,7 +74,7 @@ const ChatWidget = () => {
     } catch (error) {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        text: "I'm having trouble connecting right now. Please email info@eternalmoments.com.",
+        text: "Connection error. Please contact info@eternalmoments.com.",
         sender: 'bot',
         timestamp: new Date(),
         isError: true
@@ -79,11 +82,6 @@ const ChatWidget = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSendMessage = (e) => {
-    e.preventDefault();
-    processMessage(inputValue);
   };
 
   const suggestedQuestions = [
@@ -123,7 +121,7 @@ const ChatWidget = () => {
                 <div className={styles.botAvatar}><Bot size={20} /></div>
                 <div>
                   <h3 className={styles.headerTitle}>Wedding Assistant</h3>
-                  <p className={styles.headerSubtitle}>Online | Ask me anything!</p>
+                  <p className={styles.headerSubtitle}>Ask me anything! 💍</p>
                 </div>
               </div>
               <button className={styles.closeButton} onClick={() => setIsOpen(false)}><X size={20} /></button>
@@ -137,24 +135,45 @@ const ChatWidget = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
+                  <div className={styles.messageAvatar}>
+                    {message.sender === 'user' ? <User size={16} /> : <Bot size={16} />}
+                  </div>
                   <div className={styles.messageContent}>
                     <p className={styles.messageText}>{message.text}</p>
                     <span className={styles.messageTime}>{message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </motion.div>
               ))}
-              {isLoading && <div className={styles.loadingMessage}>Thinking...</div>}
+              {isLoading && (
+                <div className={styles.loadingMessage}>
+                  <div className={styles.typingIndicator}><span></span><span></span><span></span></div>
+                  <span className={styles.typingText}>Thinking...</span>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Fading Suggested Questions Container */}
+            {/* Added showSuggestions logic and fadeOut class */}
             <div className={`${styles.suggestedQuestions} ${!showSuggestions ? styles.fadeOut : ''}`}>
               <p className={styles.suggestedTitle}>Quick questions:</p>
               <div className={styles.questionsGrid}>
-                {suggestedQuestions.map((q, i) => (
-                  <button key={i} className={styles.questionChip} onClick={() => processMessage(q)} disabled={isLoading}>
-                    {q}
-                  </button>
+                {suggestedQuestions.map((question, index) => (
+                  <motion.button
+                    key={index}
+                    className={styles.questionChip}
+                    onClick={() => {
+                      setInputValue(question);
+                      // Trigger send logic after state updates
+                      setTimeout(() => {
+                        document.querySelector(`.${styles.sendButton}`)?.click();
+                      }, 50);
+                    }}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {question}
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -164,8 +183,9 @@ const ChatWidget = () => {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about packages or pricing..."
+                placeholder="Ask about packages..."
                 className={styles.chatInput}
+                disabled={isLoading}
               />
               <button type="submit" className={styles.sendButton} disabled={!inputValue.trim() || isLoading}>
                 <Send size={20} />
@@ -174,7 +194,16 @@ const ChatWidget = () => {
 
             <div className={styles.chatFooter}>
               <p className={styles.footerText}>
-                AI Assistant • <button className={styles.resetButton} onClick={() => { setMessages([messages[0]]); setShowSuggestions(true); }}>Start over</button>
+                AI-powered assistant • <span className={styles.highlight}>Real responses</span> •{' '}
+                <button
+                  className={styles.resetButton}
+                  onClick={() => {
+                    setMessages([messages[0]]);
+                    setShowSuggestions(true); // Reset suggestions visibility
+                  }}
+                >
+                  Start over
+                </button>
               </p>
             </div>
           </motion.div>
