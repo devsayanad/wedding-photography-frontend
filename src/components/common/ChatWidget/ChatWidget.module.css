@@ -38,9 +38,9 @@
   position: absolute;
   bottom: 80px;
   right: 0;
-  width: 650px;
+  width: 670px;
   max-width: calc(100vw - 2rem);
-  height: 650px;
+  height: 670px;
   max-height: 80vh;
   background: white;
   border-radius: 20px;
